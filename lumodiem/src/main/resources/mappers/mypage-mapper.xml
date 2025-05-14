@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mypageMapper">
+
+	<resultMap type="klassVo" id="klassMap">
+		<result property="klassNo" column="klass_no"/>
+		<result property="accountNo" column="account_no"/>
+		<result property="klassName" column="klass_name"/>
+		<result property="klassAddress" column="klass_address"/>
+		<result property="klassPrice" column="klass_price"/>
+		<result property="klassMax" column="klass_max"/>
+		<result property="klassStatus" column="klass_status"/>
+		<result property="klassTxt" column="klass_txt"/>
+		<result property="accountNickname" column="account_nickname"/>
+		<result property="klassRegDate" column="klass_reg_date"/>
+		<result property="klassModDate" column="klass_mod_date"/>
+		<result property="approveCode" column="approve_code"/>
+		
+		<result property="resNo" column="res_no"/>
+		<result property="klassDateNo" column="klass_date_no"/>
+		
+		<result property="klassStart" column="klass_start"/>
+		<result property="klassEnd" column="klass_end"/>
+		<result property="approveFb" column="approve_fb"/>
+	</resultMap>
+	<resultMap type="reviewVo" id="reviewMap">
+		<result property="reviewNo" column="review_no"/>
+		<result property="accountNo" column="account_no"/>
+		<result property="resNo" column="res_no"/>
+		<!-- <result property="klassDateNo" column="klass_date_no"/> -->
+		<result property="reviewTxt" column="review_txt"/>
+		<result property="reviewName" column="review_name"/>
+		<result property="accountNickname" column="account_nickname"/>
+		<result property="reviewRegDate" column="review_reg_date"/>
+		<result property="reviewModDate" column="review_mod_date"/>
+		<result property="orderType" column="order_type"/>
+		<result property="klassNo" column="klass_no"/>
+	</resultMap>
+	<resultMap type="klassLikeVo" id="klassLikeMap">
+		<result property="klassLikeNo" column="klass_like_no"/>
+		<result property="accountNo" column="account_no"/>
+		<result property="klassNo" column="klass_no"/>
+		<result property="klassName" column="klass_name"/>
+	</resultMap>
+	<resultMap type="reviewLikeVo" id="reviewLikeMap">
+		<result property="reviewLikeNo" column="review_like_no"/>
+		<result property="accountNo" column="account_no"/>
+		<result property="reviewNo" column="review_no"/>
+		<result property="reviewName" column="review_name"/>
+	</resultMap>
+	<resultMap type="reviewCmtVo" id="reviewCmtMap">
+		<result property="reviewCmtNo" column="review_cmt_no"/>
+		<result property="accountNo" column="account_no"/>
+		<result property="reviewNo" column="review_no"/>
+		<result property="reviewName" column="review_name"/>
+		<result property="reviewCmtTxt" column="review_cmt_txt"/>
+	</resultMap>
+	<resultMap type="klassDateVo" id="klassDateMap">
+		<result property="klassDateNo" column="klass_date_no"/>
+		<result property="klassNo" column="klass_no"/>
+		<result property="klassStart" column="klass_start"/>
+		<result property="klassEnd" column="klass_end"/>
+		<result property="klassCount" column="klass_count"/>
+	</resultMap>
+	<resultMap type="reviewDTOVo" id="reviewDTOMap">
+		<result property="klassNo" column="klass_no"/>
+		<result property="klassName" column="klass_name"/>
+		<result property="klassStart" column="klass_start"/>
+		<result property="klassEnd" column="klass_end"/>
+		<result property="reviewName" column="review_name"/>
+		<result property="reviewTxt" column="review_txt"/>
+		<result property="reviewNo" column="review_no"/>
+		<result property="klassDateNo" column="klass_date_no"/>
+	</resultMap>
+	<resultMap type="accountVo" id="accountMap">
+		<result property="accountNo" column="account_no"/>
+		<result property="accountName" column="account_name"/>
+		<result property="accountId" column="account_id"/>
+		<result property="accountPw" column="account_pw"/>
+		<result property="accountNickname" column="account_nickname"/>
+		<result property="accountSsn" column="account_ssn"/>
+		<result property="accountAddress" column="account_address"/>
+		<result property="accountPhone" column="account_phone"/>
+		<result property="accountEmail" column="account_email"/>
+		<result property="accountGrade" column="account_grade"/>
+		<result property="accountRegDate" column="account_reg_date"/>
+	</resultMap>
+	
+	<!-- approve 테이블 -> 내가 올린 클래스 중에서 승인,대기,반려(A,S,D)인 클래스 조회 -->
+	<select id="klassListSearch" resultMap="klassMap" parameterType="klassVo">
+		SELECT k.* ,a.account_nickname ,p.approve_code ,p.approve_fb
+		FROM `klass` k
+		JOIN `account` a
+		ON k.account_no = a.account_no
+		JOIN `approve` p
+		ON k.klass_no = p.klass_no
+		<where>
+			<if test='accountNo != null'>
+				AND k.account_no = #{accountNo}
+			</if>
+			<if test="approveCode != null">
+				AND p.approve_code = #{approveCode}
+			</if>
+		</where>
+		<if test='approveCode == "S"'>
+			ORDER BY k.klass_reg_date ASC
+			LIMIT #{limitPageNo} ,#{numPerPage}
+		</if>
+		<if test='approveCode != "S"'>
+			ORDER BY k.klass_reg_date DESC
+			LIMIT #{limitPageNo} ,#{numPerPage}
+		</if>
+	</select>
+	
+	<!-- review 테이블 -> 호스트 회원 번호 기준으로 내 클래스의 review 조회  -->
+	<select id="selectReviewListByHostAccountNo" resultMap="reviewMap" parameterType="klassVo">
+		SELECT r.*, k.klass_no
+		FROM `review` r
+		JOIN `reservation` v ON r.res_no = v.res_no
+		JOIN `klass_date` d ON v.klass_date_no = d.klass_date_no
+		JOIN `klass` k ON d.klass_no = k.klass_no
+		WHERE k.account_no = #{accountNo}
+		ORDER BY r.review_reg_date DESC
+		LIMIT #{limitPageNo} ,#{numPerPage}
+	</select>
+	
+	<!-- klass_like 테이블 -> 회원 번호 기준으로 좋아요한 클래스 조회  -->
+	<select id="selectKlassLikeByAccountNo" resultMap="klassMap" parameterType="klassVo">
+		SELECT a.account_nickname, k.*
+		FROM `klass_like` l
+		JOIN `klass` k ON l.klass_no = k.klass_no
+		JOIN `account` a ON k.account_no = a.account_no
+		WHERE l.account_no = #{accountNo}
+		ORDER BY l.klass_like_no DESC
+		LIMIT #{limitPageNo} ,#{numPerPage}
+	</select>
+	
+	<!-- review_like 테이블 -> 회원 번호 기준으로 좋아요한 리뷰 조회  -->
+	<select id="selectReviewLikeByAccountNo" resultMap="reviewMap" parameterType="klassVo">
+		SELECT a.account_nickname, r.*
+		FROM `review_like` l
+		JOIN `review` r ON l.review_no = r.review_no
+		JOIN `account` a ON r.account_no = a.account_no
+		WHERE l.account_no = #{accountNo}
+		ORDER BY l.review_like_no DESC
+		LIMIT #{limitPageNo} ,#{numPerPage}
+	</select>
+	
+	<!-- review_cmt 테이블 -> 회원 번호 기준으로 리뷰 댓글 조회  -->
+	<select id="selectReviewCmtListByAccountNo" resultMap="reviewCmtMap" parameterType="klassVo">
+		SELECT c.*, r.review_name
+		FROM `review_cmt`c
+		JOIN `review` r ON c.review_no = r.review_no
+		WHERE c.account_no = ${accountNo}
+		ORDER BY c.review_cmt_no DESC
+		LIMIT #{limitPageNo} ,#{numPerPage}
+	</select>
+	
+	<!-- klass 테이블 -> 멤버 회원 번호 기준으로 reservation테이블 조회하여 예약 이력이 있는 클래스 조회  -->
+	<select id="selectReservationKlassListByAccountNo" resultMap="klassMap" parameterType="klassVo">
+		SELECT k.*, a.account_nickname, d.*, k.klass_address
+		FROM `reservation` r
+		JOIN `klass_date` d ON r.klass_date_no = d.klass_date_no
+		JOIN `klass` k ON d.klass_no = k.klass_no
+		JOIN `account` a ON k.account_no = a.account_no
+		WHERE r.account_no = #{accountNo}
+		ORDER BY d.klass_start ASC
+		LIMIT #{limitPageNo} ,#{numPerPage}
+	</select>
+	
+	<!-- klass 테이블 -> 멤버 회원 번호 기준으로 reservation테이블 조회하여 예약 이력이 있는 클래스 조회  -->
+	<select id="selectReviewKlassListByAccountNo" resultMap="reviewDTOMap" parameterType="klassVo">
+		SELECT k.*, a.account_nickname, d.klass_date_no, d.klass_start, d.klass_end, r.review_name, r.review_txt, r.review_no
+		FROM `review` r
+		JOIN `reservation` res ON r.res_no = res.res_no
+		JOIN `klass_date` d ON res.klass_date_no = d.klass_date_no
+		JOIN `klass` k ON d.klass_no = k.klass_no
+		JOIN `account` a ON k.account_no = a.account_no
+		WHERE r.account_no = #{accountNo}
+	</select>
+	
+	<!-- 회원탈퇴 -->
+	<delete id="deleteAccount" parameterType="accountVo">
+		DELETE FROM `account`
+		<where>
+			AND account_no = #{accountNo}
+			AND account_id = #{accountId}
+			AND account_pw = #{accountPw}
+		</where>
+	</delete>
+	<!-- 페이징을 위한 카운트 -->
+	<select id="klassListCount" resultType="_int" parameterType="klassVo">
+		SELECT count(*)
+		FROM `klass` k
+		JOIN `account` a
+		ON k.account_no = a.account_no
+		JOIN `approve` p
+		ON k.klass_no = p.klass_no
+		<where>
+			<if test='accountNo != null'>
+				AND k.account_no = #{accountNo}
+			</if>
+			<if test="approveCode != null">
+				AND p.approve_code = #{approveCode}
+			</if>
+		</where>
+		<if test='approveCode == "S"'>
+			ORDER BY k.klass_reg_date ASC
+		</if>
+		<if test='approveCode != "S"'>
+			ORDER BY k.klass_reg_date DESC
+		</if>
+	</select>
+		<!-- 페이징을 위한 카운트  -->
+	<select id="reservationKlassListCount" resultType="_int" parameterType="klassVo">
+		SELECT count(*)
+		FROM `reservation` r
+		JOIN `klass_date` d ON r.klass_date_no = d.klass_date_no
+		JOIN `klass` k ON d.klass_no = k.klass_no
+		JOIN `account` a ON k.account_no = a.account_no
+		WHERE r.account_no = #{accountNo}
+	</select>
+		<!-- 페이징을 위한 카운트  -->
+	<select id="klassLikeListCount" resultType="_int" parameterType="klassVo">
+		SELECT count(*)
+		FROM `klass_like` l
+		JOIN `klass` k ON l.klass_no = k.klass_no
+		JOIN `account` a ON k.account_no = a.account_no
+		WHERE l.account_no = #{accountNo}
+	</select>
+		<!-- 페이징을 위한 카운트  -->
+	<select id="reviewLikeListCount" resultType="_int" parameterType="klassVo">
+		SELECT count(*)
+		FROM `review_like` l
+		JOIN `review` r ON l.review_no = r.review_no
+		JOIN `account` a ON r.account_no = a.account_no
+		WHERE l.account_no = #{accountNo}
+	</select>
+		<!-- 페이징을 위한 카운트  -->
+	<select id="reviewCmtListCount" resultType="_int" parameterType="klassVo">
+		SELECT count(*)
+		FROM `review_cmt`c
+		JOIN `review` r ON c.review_no = r.review_no
+		WHERE c.account_no = ${accountNo}
+	</select>
+	
+	
+</mapper>

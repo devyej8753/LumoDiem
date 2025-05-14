@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="klassMapper">
+
+	<resultMap type="klassVo" id="klassMap">
+		<result property="klassNo" column="klass_no"/>
+		<result property="accountNo" column="account_no"/>
+		<result property="klassName" column="klass_name"/>
+		<result property="klassAddress" column="klass_address"/>
+		<result property="klassPrice" column="klass_price"/>
+		<result property="klassMax" column="klass_max"/>
+		<result property="klassStatus" column="klass_status"/>
+		<result property="klassTxt" column="klass_txt"/>
+		<result property="accountNickname" column="account_nickname"/>
+		<result property="klassRegDate" column="klass_reg_date"/>
+		<result property="klassModDate" column="klass_mod_date"/>
+		<result property="klassLikeCount" column="klass_like_count"/>
+		<result property="attachNo" column="attach_no"/>
+	</resultMap>
+	
+	<resultMap type="klassDateVo" id="klassDateMap">
+		<result property="klassDateNo" column="klass_date_no"/>
+		<result property="klassNo" column="klass_no"/>
+		<result property="klassStart" column="klass_start"/>
+		<result property="klassEnd" column="klass_end"/>
+		<result property="klassCount" column="klass_count"/>
+		<result property="klassMax" column="klass_max"/>
+		<result property="resNo" column="res_no"/>
+	</resultMap>
+	
+	<resultMap type="klassAttachVo" id="klassAttachMap">
+		<result property="attachNo" column="attach_no"/>
+		<result property="attachOri" column="attach_ori"/>
+		<result property="attachNew" column="attach_new"/>
+		<result property="attachPath" column="attach_path"/>
+	</resultMap>
+	
+	<resultMap type="klassMappingVo" id="klassMappingMap">
+		<result property="mappingNo" column="mapping_no"/>
+		<result property="klassNo" column="klass_no"/>
+		<result property="attachNo" column="attach_no"/>
+	</resultMap>
+	
+	<resultMap type="reviewVo" id="reviewMap">
+		<result property="reviewNo" column="review_no"/>
+		<result property="accountNo" column="account_no"/>
+		<result property="resNo" column="res_no"/>
+		<result property="reviewTxt" column="review_txt"/>
+		<result property="reviewName" column="review_name"/>
+		<result property="accountNickname" column="account_nickname"/>
+		<result property="reviewRegDate" column="review_reg_date"/>
+		<result property="reviewModDate" column="review_mod_date"/>
+		<result property="attachNo" column="attach_no"/>
+		<result property="klassName" column="klass_name"/>
+		<result property="payTime" column="pay_time"/>
+		<result property="payStatus" column="pay_status"/>
+		<result property="payPrice" column="pay_price"/>
+		<result property="attachPath" column="attach_path"/>
+	</resultMap>
+	<resultMap type="reservationVo" id="reservationMap">
+		<result property="resNo" column="res_no"/>
+		<result property="accountNo" column="account_no"/>
+		<result property="klassDateNo" column="klass_date_no"/>
+		<result property="resPpl" column="res_ppl"/>
+		<result property="payTime" column="pay_time"/>
+		<result property="payStatus" column="pay_status"/>
+		<result property="payPrice" column="pay_price"/>
+	</resultMap>
+	<resultMap type="klassLikeVo" id="klassLikeMap">
+		<result property="klassLikeNo" column="klass_like_no"/>
+		<result property="accountNo" column="account_no"/>
+		<result property="klassNo" column="klass_no"/>
+		<result property="klassName" column="klass_name"/>
+	</resultMap>
+	<resultMap type="chatVo" id="chatMap">
+		<result property="chatNo" column="chat_no"/>
+		<result property="klassNo" column="klass_no"/>
+		<result property="chatTxt" column="chat_txt"/>
+		<result property="accountNickname" column="account_nickname"/>
+	</resultMap>
+	<resultMap type="klassReportVo" id="klassReportMap">
+		<result property="reportKlassNo" column="report_klass_no"/>
+		<result property="klassNo" column="klass_no"/>
+		<result property="accountNo" column="account_no"/>
+		<result property="reportKlassTxt" column="report_klass_txt"/>
+	</resultMap>
+	
+	<insert id="insertKlassReport">
+		INSERT INTO `klass_report`(klass_no ,account_no ,report_klass_txt)
+		VALUES (#{klassNo} ,#{accountNo} ,#{reportKlassTxt})
+	</insert>
+	
+	<insert id="klassMappingCreate" parameterType="klassMappingVo"  useGeneratedKeys="true" keyProperty="mappingNo">
+		INSERT INTO `klass_mapping`(klass_no ,attach_no)
+		VALUES (#{klassNo} ,#{attachNo})
+	</insert>
+	
+	<insert id="klassAttachCreate" parameterType="klassAttachVo" useGeneratedKeys="true" keyProperty="attachNo">
+		INSERT INTO `klass_attach`(attach_ori, attach_new ,attach_path)
+		VALUES (#{attachOri} ,#{attachNew}, #{attachPath})
+	</insert>
+	
+	<insert id="klassDateCreate" parameterType="klassDateVo" useGeneratedKeys="true">
+		 INSERT INTO klass_date (klass_no, klass_start, klass_end)
+  		 VALUES (#{klassNo}, #{klassStart}, #{klassEnd})
+	</insert>
+		
+	<insert id="klassCreate" parameterType="klassVo" useGeneratedKeys="true" keyProperty="klassNo">
+		INSERT INTO `klass`(account_no ,klass_name ,klass_address ,klass_max ,klass_price ,klass_txt ,klass_reg_date ,klass_mod_date)
+		VALUES(#{accountNo} ,#{klassName} ,#{klassAddress} ,#{klassMax} ,#{klassPrice} ,#{klassTxt} ,#{klassRegDate} ,#{klassModDate})
+	</insert>
+	<!-- 참여자가 예약한 인원 -->
+	<insert id="resKlassRes" parameterType="reservationVo" useGeneratedKeys="true" keyProperty="resNo">
+		INSERT INTO `reservation`(account_no ,klass_date_no, res_ppl)
+		VALUE(#{accountNo} ,#{klassDateNo} ,#{resPpl})
+	</insert>
+	<update id="klassUpdate" parameterType="klassVo" >
+	 	UPDATE `klass`
+	 	SET klass_name = #{klassName}
+	 		,klass_max = #{klassMax}
+	 		,klass_price = #{klassPrice}
+	 		,klass_txt = #{klassTxt}
+	 		,klass_mod_date = #{klassModDate}
+	 	WHERE klass_no = #{klassNo}	
+	</update>
+	
+	<update id="klassDateUpdate" parameterType="klassDateVo" >
+		UPDATE `klass_date` 
+		SET klass_start = #{klassStart}
+			,klass_end = #{klassEnd}
+		WHERE klass_no = #{klassNo}	
+	</update>
+	
+	<update id="klassAttachUpdate" parameterType="klassAttachVo">
+		UPDATE `klass_attach`
+		SET attach_ori = #{attachOri}
+			,attach_new = #{attachNew}
+			,attach_path = #{attachPath}
+		WHERE attach_no = #{attachNo}	
+	
+	</update>
+	
+	<delete id="klassMapDelete" parameterType="_int">
+		DELETE FROM `klass_mapping`
+		WHERE klass_no = #{klassNo}
+	</delete>
+	
+	<delete id="klassAttachDelete" parameterType="klassAttachVo">
+		DELETE FROM `klass_attach`
+		WHERE attach_no = #{attachNo}
+	</delete>
+	
+	<delete id="klassDateDelete" parameterType="_int">
+		DELETE FROM `klass_date`
+		WHERE klass_no = #{klassNo}
+	</delete>
+	
+ 	<delete id="klassDelete" parameterType="klassVo">
+		DELETE k FROM `klass` k
+		JOIN `klass_mapping` m ON k.klass_no = m.klass_no
+		JOIN `klass_attach` a ON a.attach_no = m.attach_no
+		<where>
+			klass_no = #{klassNo}
+		</where>
+	</delete>
+	
+	<delete id="klassDeleteOne" parameterType="klassVo">
+		DELETE FROM `klass`
+		WHERE klass_no = #{klassNo}
+	</delete>
+	
+	<select id="klassReviewList" resultMap="reviewMap" parameterType="_int">
+		SELECT r.*,a.account_nickname
+		FROM `review` r
+		JOIN `reservation` rs
+		ON r.res_no = rs.res_no
+		JOIN `klass_date` d
+		ON rs.klass_date_no = d.klass_date_no
+		JOIN `klass` k
+		ON d.klass_no = k.klass_no
+		JOIN `account` a
+		ON r.account_no = a.account_no
+		WHERE k.klass_no = #{klassNo}
+	</select>
+	
+<select id="imgklassList" resultMap="klassMap" parameterType="klassVo">
+    SELECT k.*, a.account_nickname, IFNULL(t.attach_no, 0) AS attach_no
+    FROM `klass` k
+    JOIN `account` a ON k.account_no = a.account_no
+    JOIN `approve` p ON k.klass_no = p.klass_no
+    LEFT JOIN `klass_mapping` m ON k.klass_no = m.klass_no
+    LEFT JOIN `klass_attach` t ON t.attach_no = m.attach_no
+    <where>
+        p.approve_code = 'A'
+        <if test='searchType == "1"'>
+            AND k.klass_name LIKE CONCAT('%', #{searchTxt}, '%')
+        </if>
+        <if test='searchType == "2"'>
+            AND a.account_nickname LIKE CONCAT('%', #{searchTxt}, '%')
+        </if>
+        <if test='searchType == "3"'>
+            AND k.klass_txt LIKE CONCAT('%', #{searchTxt}, '%')
+        </if>
+    </where>
+
+    <choose>
+        <when test='orderType == "b"'>
+            ORDER BY k.klass_reg_date ASC
+        </when>
+        <when test='orderType == "c"'>
+            ORDER BY k.klass_like_count DESC
+        </when>
+        <otherwise>
+            ORDER BY k.klass_reg_date DESC
+        </otherwise>
+    </choose>
+    LIMIT #{limitPageNo} ,#{numPerPage}
+</select>
+
+<!-- 	<select id="imgklassList" resultMap="klassMap" parameterType="klassVo">
+		SELECT k.* ,a.account_nickname ,t.attach_no
+		FROM `klass` k
+		JOIN `account` a ON k.account_no = a.account_no
+		JOIN `approve` p ON k.klass_no = p.klass_no
+		LEFT JOIN `klass_mapping` m ON k.klass_no = m.klass_no
+		LEFT JOIN `klass_attach` t ON t.attach_no = m.attach_no
+		<where>
+				p.approve_code = 'A'
+			<if test='searchType != null and searchType.equals("0") == false and searchType.equals("1")'>
+				AND k.klass_name LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if test='searchType != null and searchType.equals("0") == false and searchType.equals("2")'>
+				AND a.account_nickname LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if test='searchType != null and searchType.equals("0") == false and searchType.equals("3")'>
+				AND k.klass_txt LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+		</where>
+		
+		<if test='orderType != null and orderType.equals("x") == false'>
+			<choose>
+				<when test='orderType.equals("b") == true'>
+					ORDER BY k.klass_reg_date ASC
+			LIMIT #{limitPageNo}, #{numPerPage}
+				</when>
+				<when test='orderType.equals("c") == true'>
+					ORDER BY k.klass_like_count DESC
+			LIMIT #{limitPageNo}, #{numPerPage}
+				</when>
+				<otherwise>
+					ORDER BY k.klass_reg_date DESC
+			LIMIT #{limitPageNo}, #{numPerPage}
+				</otherwise>
+			</choose>
+		</if>
+		<if test ='orderType == null or orderType.equals("x") == true'>
+			ORDER BY k.klass_reg_date DESC
+			LIMIT #{limitPageNo}, #{numPerPage}
+		</if>
+	</select> -->
+ 	
+	<select id="klassList" resultMap="klassMap" parameterType="klassVo">
+		SELECT k.* ,a.account_nickname
+		FROM `klass` k
+		JOIN `account` a
+		ON k.account_no = a.account_no
+		JOIN `approve` p ON k.klass_no = p.klass_no
+		<where>
+				AND	p.approve_code = 'A'
+			<if test='searchType != null and searchType.equals("0") == false and searchType.equals("1")'>
+				AND k.klass_name LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if test='searchType != null and searchType.equals("0") == false and searchType.equals("2")'>
+				AND a.account_nickname LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if test='searchType != null and searchType.equals("0") == false and searchType.equals("3")'>
+				AND k.klass_txt LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+		</where>
+		
+		<if test='orderType != null and orderType.equals("x") == false'>
+			<choose>
+				<when test='orderType.equals("b") == true'>
+					ORDER BY k.klass_reg_date ASC
+				</when>
+				<when test='orderType.equals("c") == true'>
+					ORDER BY k.klass_like_count DESC
+				</when>
+				<otherwise>
+					ORDER BY k.klass_reg_date DESC
+				</otherwise>
+			</choose>
+		</if>
+		<if test ='orderType == null or orderType.equals("x") == true'>
+			ORDER BY k.klass_reg_date DESC
+		</if>
+	</select>
+	
+	<select id="klassOne" resultMap="klassMap" parameterType="_int">
+		SELECT k.* ,a.account_nickname			
+		FROM `klass` k
+		JOIN `account` a
+		ON k.account_no = a.account_no
+	<where>
+		AND k.klass_no = #{klassNo}
+	</where>	
+	</select>
+	
+	<select id="klassAttachList" resultMap="klassAttachMap" parameterType="_int" resultType="klassAttachVo">
+		SELECT a.*
+		FROM `klass_attach` a
+		JOIN `klass_mapping` m
+		ON a.attach_no = m.attach_no
+	<where>
+		AND m.klass_no = #{klassNo}
+	</where>	
+	</select>
+	
+	<select id="klassDateList" resultMap="klassDateMap" parameterType="_int" resultType="klassDateVo">
+		SELECT d.*
+		FROM `klass_date` d
+		JOIN `klass` k
+		ON d.klass_no = k.klass_no
+	<where>
+		AND d.klass_no = #{klassNo}
+	</where>
+	</select>
+	
+	<select id="attachOne" resultMap="klassAttachMap" parameterType="_int">
+		SELECT *
+		FROM `klass_attach`
+		WHERE attach_no = #{attachNo}
+	</select>
+	
+	<!-- attach 를 klassNo로 구분해서 가져옴 -->
+	<select id="selectAttachOneByKlassNo" resultMap="klassAttachMap" parameterType="_int">
+		SELECT a.*
+		FROM `klass_attach` a
+		JOIN `klass_mapping` m
+		ON a.attach_no = m.attach_no
+		JOIN `klass` k
+		ON m.klass_no = k.klass_no
+		WHERE k.klass_no = #{klassNo}
+	</select>
+	<!-- 해당 클래스의 좋아요 갯수 -->
+	<select id='countLikeByKlassNo' parameterType="_int" resultType="int">
+		SELECT count(*)
+		FROM `klass_like`
+		<where>
+			klass_no = #{klassNo}
+		</where>
+	</select>
+	<!-- 해당 클래스의 좋아요 갯수 -->
+	<select id='countLikeByAccountNoKlassNo' parameterType="klassLikeVo" resultType="int">
+		SELECT count(*)
+		FROM `klass_like`
+		<where>
+			klass_no = #{klassNo}
+			AND account_no = #{accountNo}
+		</where>
+	</select>
+	<!-- 좋아요 추가 -->
+	<insert id="klassUnlikeToLike" parameterType="klassLikeVo" useGeneratedKeys="true" keyProperty="klassNo">
+		INSERT INTO `klass_like`(account_no ,klass_no)
+		VALUES (#{accountNo} ,#{klassNo})
+	</insert>
+	<!-- 좋아요 제거 -->
+ 	<delete id="klassLikeToUnlike" parameterType="klassLikeVo">
+		DELETE FROM `klass_like`
+		<where>
+			klass_no = #{klassNo}
+			AND account_no = #{accountNo}
+		</where>
+	</delete>
+	<!-- 해당 클래스 번호에 채팅 내역 추가 -->
+	<update id="updateKlassChat" parameterType="chatVo">
+		UPDATE `chat`
+		SET chat_txt = CONCAT(chat_txt, #{chatTxt})
+		WHERE klass_no = #{klassNo}	
+	</update>
+
+	<!-- 해당 클래스 번호로 채팅 내역 가져오기 -->
+	<select id='selectKlassChatByKlassNo' resultMap="chatMap" parameterType="chatVo" resultType="chatVo">
+		SELECT *
+		FROM `chat`
+		<where>
+			klass_no = #{klassNo}
+		</where>
+	</select>
+	<!-- 클래스 예약 가능인원,클래스예약 최대인원 -->
+	<select id='klassCountByKlassMax' resultMap="klassDateMap" parameterType="klassDateVo">
+		SELECT d.* ,k.klass_max
+		FROM `klass_date` d
+		JOIN `klass` k
+		ON d.klass_no = k.klass_no
+		WHERE d.klass_date_no = #{klassDateNo}
+	</select>
+	<select id='resSelect' resultMap="reservationMap" parameterType="reservationVo">
+		SELECT *
+		FROM `reservation`
+		WHERE account_no = #{accountNo}
+		AND klass_date_no = #{klassDateNo}
+	</select>
+	<delete id="cnclReservation" parameterType="reservationVo">
+		DELETE FROM `reservation`
+		WHERE res_no = #{resNo};
+	</delete>
+	<!-- 결제 성공시 C -> R 변경 -->
+	<update id="updateReservationOneCtoR" parameterType="_int">
+		UPDATE `reservation`
+		SET pay_status = 'R'
+		WHERE res_no = #{resNo}
+	</update>
+	
+	
+	<!-- 결제 실패시 reservation 테이블에서 delete -->
+	<!-- <delete id="deleteReservationOneRtoC" parameterType="_int">
+		DELETE FROM `reservation`
+		WHERE res_no = #{resNo};
+	</delete> -->
+	<!-- <update id="updateReservationOneRtoC" parameterType="_int">
+		UPDATE `reservation`
+		SET pay_status = 'C'
+		WHERE res_no = #{resNo}
+	</update> -->
+	<!-- res_no로 예약 테이블 정보 조회 -->
+	<select id='selectReservationOne' resultMap="reservationMap" parameterType="reservationVo">
+		SELECT *
+		FROM `reservation`
+		WHERE res_no = #{resNo}
+	</select>
+	<!-- 페이징을 위한 카운트 -->
+	<select id="selectKlassCount" resultType="_int" parameterType="klassVo">
+		SELECT count(*)
+		FROM `klass` k
+		JOIN `account` a ON k.account_no = a.account_no
+		JOIN `approve` p ON k.klass_no = p.klass_no
+		LEFT JOIN `klass_mapping` m ON k.klass_no = m.klass_no
+		LEFT JOIN `klass_attach` t ON t.attach_no = m.attach_no
+		<where>
+				AND	p.approve_code = 'A'
+			<if test='searchType != null and searchType.equals("0") == false and searchType.equals("1")'>
+				AND k.klass_name LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if test='searchType != null and searchType.equals("0") == false and searchType.equals("2")'>
+				AND a.account_nickname LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if test='searchType != null and searchType.equals("0") == false and searchType.equals("3")'>
+				AND k.klass_txt LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+		</where>
+		
+		<if test='orderType != null and orderType.equals("x") == false'>
+			<choose>
+				<when test='orderType.equals("b") == true'>
+					ORDER BY k.klass_reg_date ASC
+				</when>
+				<when test='orderType.equals("c") == true'>
+					ORDER BY k.klass_like_count DESC
+				</when>
+				<otherwise>
+					ORDER BY k.klass_reg_date DESC
+				</otherwise>
+			</choose>
+		</if>
+		<if test ='orderType == null or orderType.equals("x") == true'>
+			ORDER BY k.klass_reg_date DESC
+		</if>
+		
+	</select>
+</mapper>

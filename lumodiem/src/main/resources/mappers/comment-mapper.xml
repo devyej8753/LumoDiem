@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="commentMapper">
+
+
+	<resultMap type="reviewVo" id="reviewMap">
+		<result property="reviewNo" column="review_no" />
+		<result property="accountNo" column="account_no" />
+		<result property="reviewTxt" column="review_txt" />
+		<result property="reviewName" column="review_name" />
+		<result property="accountNickname" column="account_nickname" />
+		<result property="reviewRegDate" column="review_reg_date" />
+		<result property="reviewModDate" column="review_mod_date" />
+	</resultMap>
+	<resultMap type="commentVo" id="commentMap">
+		<result property="reviewCmtNo" column="review_cmt_no" />
+		<result property="accountNo" column="account_no" />
+
+		<result property="accountGrade" column="account_grade" />
+		<result property="reviewNo" column="review_no" />
+		<result property="accountNickname" column="account_nickname" />
+		<result property="reviewCmtTxt" column="review_cmt_txt" />
+	</resultMap>
+
+	<select id="commentSelectOne" resultMap="commentMap"
+		parameterType="_int">
+		SELECT *
+		FROM review_cmt
+		<where>
+			review_no = #{reviewNo}
+		</where>
+
+	</select>
+
+	<select id="commentSelect" parameterType="commentVo"
+		resultMap="commentMap">
+		SELECT rc.* ,a.account_nickname, a.account_no
+		FROM review_cmt rc
+		JOIN
+		review r
+		ON r.review_no = rc.review_no
+		JOIN account a
+		ON rc.account_no =
+		a.account_no
+		<where>
+			rc.review_no = #{reviewNo}
+		</where>
+		ORDER BY rc.review_cmt_no DESC
+	</select>
+
+	<insert id="commentCreate" parameterType="commentVo"
+		useGeneratedKeys="true" keyProperty="reviewCmtNo">
+		INSERT INTO review_cmt(account_no
+		,review_no ,review_cmt_txt)
+		VALUES (#{accountNo} ,#{reviewNo}
+		,#{reviewCmtTxt})
+	</insert>
+
+	<update id="commentUpdate" parameterType="commentVo"
+		useGeneratedKeys="true" keyProperty="reviewCmtNo">
+		UPDATE `review_cmt`
+		SET `review_cmt_txt` = #{reviewCmtTxt}
+		<where>
+			review_cmt_no = #{reviewCmtNo}
+		</where>
+
+	</update>
+
+	<delete id="commentDelete" parameterType="_int">
+		DELETE FROM `review_cmt`
+		<where>
+			review_cmt_no = #{reviewCmtNo}
+		</where>
+	</delete>
+
+</mapper>

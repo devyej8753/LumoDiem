@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="reportMapper">
+
+
+	<resultMap type="klassVo" id="klassMap">
+		<result property="klassNo" column="klass_no" />
+		<result property="accountNo" column="account_no" />
+		<result property="klassName" column="klass_name" />
+		<result property="klassAddress" column="klass_address" />
+		<result property="klassPrice" column="klass_price" />
+		<result property="klassMax" column="klass_max" />
+		<result property="klassStatus" column="klass_status" />
+		<result property="klassTxt" column="klass_txt" />
+		<result property="accountNickname" column="account_nickname" />
+		<result property="klassRegDate" column="klass_reg_date" />
+		<result property="klassModDate" column="klass_mod_date" />
+	</resultMap>
+
+	<resultMap type="reportKlassVo" id="reportKlassMap">
+		<result property="reportKlassNo" column="report_klass_no" />
+		<result property="klassNo" column="klass_no" />
+		<result property="accountNo" column="account_no" />
+		<result property="klassName" column="klass_name" />
+		<result property="accountNickname" column="account_nickname" />
+		<result property="klassTxt" column="klass_txt" />
+		<result property="reportKlassTxt" column="report_klass_txt" />
+
+
+		<result property="klassAddress" column="klass_address" />
+		<result property="klassPrice" column="klass_price" />
+		<result property="klassMax" column="klass_max" />
+		<result property="klassStatus" column="klass_status" />
+		<result property="klassRegDate" column="klass_reg_date" />
+		<result property="klassModDate" column="klass_mod_date" />
+		<result property="approveCode" column="approve_code" />
+	</resultMap>
+
+	<resultMap type="reportReviewVo" id="reportReviewMap">
+
+		<result property="reportReviewNo" column="report_review_no" />
+		<result property="accountNo" column="account_no" />
+		<result property="reviewNo" column="review_no" />
+
+		<result property="reviewName" column="review_name" />
+		<result property="reviewTxt" column="review_txt" />
+		<result property="accountNickname" column="account_nickname" />
+
+
+		<result property="reviewRegDate" column="review_reg_date" />
+		<result property="reviewModDate" column="review_mod_date" />
+		<result property="orderType" column="order_type" />
+		<result property="attachNo" column="attach_no" />
+		<result property="attachPath" column="attach_path" />
+
+		<result property="reportReviewTxt" column="report_review_txt" />
+
+	</resultMap>
+	<resultMap type="reportReviewCmtVo" id="reportReviewCmtMap">
+
+		<result property="reportReviewCmtNo"
+			column="report_review_cmt_no" />
+		<result property="accountNo" column="account_no" />
+		<result property="reviewCmtNo" column="review_cmt_no" />
+
+		<result property="reviewName" column="review_name" />
+		<result property="reviewCmtTxt" column="review_cmt_txt" />
+		<result property="accountNickname" column="account_nickname" />
+		<result property="reportReviewCmtTxt"
+			column="report_review_cmt_txt" />
+	</resultMap>
+
+	<delete id="deleteReportReviewCmt" parameterType="_int">
+		DELETE FROM `review_cmt`
+		<where>
+			review_cmt_no = #{reviewCmtNo};
+		</where>
+	</delete>
+
+	<select id="selectReportReviewCmt"
+		resultMap="reportReviewCmtMap" parameterType="reportReviewCmtVo">
+		SELECT rc.review_cmt_txt
+		,a.account_nickname
+		,rrc.review_cmt_no
+		,rrc.report_review_cmt_txt
+		FROM `report_review_cmt` rrc
+		JOIN `review_cmt` rc
+		ON rrc.review_cmt_no = rc.review_cmt_no
+		JOIN `account` a
+		ON rrc.account_no = a.account_no
+		JOIN `review` r
+		ON r.review_no = rc.review_no
+
+		<where>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("1")'>
+				AND a.account_nickname LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("2")'>
+				AND rc.review_cmt_txt LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+		</where>
+
+	</select>
+
+
+
+
+	<delete id="deleteReportReview" parameterType="_int">
+		DELETE FROM `review`
+		<where>
+			review_no = #{reviewNo};
+		</where>
+	</delete>
+
+	<select id="reportReviewOne" resultMap="reportReviewMap"
+		parameterType="reportReviewVo">
+		SELECT r.*, a.account_nickname
+		FROM report_review rr
+		JOIN review r
+		ON r.review_no = rr.review_no
+		JOIN `account` a
+		ON rr.account_no = a.account_no
+		<where>
+			rr.report_review_no = #{reportReviewNo}
+		</where>
+	</select>
+
+	<select id="selectReportReview" resultMap="reportReviewMap"
+		parameterType="reportReviewVo">
+		SELECT r.*
+		,a.account_nickname
+		,rr.report_review_no
+		,rr.report_review_txt
+		FROM `report_review` rr
+		JOIN `review` r
+		ON rr.review_no = r.review_no
+		JOIN `account` a
+		ON a.account_no = rr.account_no
+
+		<where>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("1")'>
+				AND r.review_name LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("2")'>
+				AND a.account_nickname LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("3")'>
+				AND r.review_txt LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+		</where>
+		ORDER BY rr.report_review_no DESC
+		LIMIT #{limitPageNo} ,#{numPerPage}
+
+	</select>
+
+	<select id="reportKlassOne" resultMap="reportKlassMap"
+		parameterType="reportKlassVo">
+
+		SELECT k.*
+		,a.account_nickname
+		,ap.approve_code
+		FROM `approve` ap
+		JOIN `klass` k
+		ON k.klass_no = ap.klass_no
+		JOIN `account` a
+		ON k.account_no = a.account_no
+		<where>
+			k.klass_no = #{klassNo}
+		</where>
+	</select>
+
+
+	<delete id="deleteReportKlass" parameterType="_int">
+		DELETE FROM `klass`
+		<where>
+			klass_no = #{klassNo}
+		</where>
+	</delete>
+
+
+	<select id="selectReportKlass" resultMap="reportKlassMap"
+		parameterType="reportKlassVo">
+
+		SELECT k.*
+		,a.account_nickname
+		,kr.report_klass_txt
+		FROM `klass_report` kr
+		JOIN `klass` k
+		ON kr.klass_no = k.klass_no
+		JOIN `account` a
+		ON a.account_no = kr.account_no
+		<where>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("1")'>
+				AND k.klass_name LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("2")'>
+				AND a.account_nickname LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("3")'>
+				AND k.klass_txt LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+		</where>
+		ORDER BY kr.report_klass_no DESC
+		LIMIT #{limitPageNo} ,#{numPerPage}
+
+	</select>
+	<!-- 페이징을 위한 카운트 -->
+	<select id="klassListCount" resultType="_int"
+		parameterType="klassVo">
+
+		SELECT count(*)
+		FROM `klass_report` kr
+		JOIN `klass` k
+		ON kr.klass_no = k.klass_no
+		JOIN `account` a
+		ON a.account_no = kr.account_no
+		<where>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("1")'>
+				AND k.klass_name LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("2")'>
+				AND a.account_nickname LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("3")'>
+				AND k.klass_txt LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+		</where>
+	</select>
+	<!-- 페이징을 위한 카운트 -->
+	<select id="reportReviewListCount" resultType="_int"
+		parameterType="reportReviewVo">
+		SELECT count(*)
+		FROM `report_review` rr
+		JOIN `review` r
+		ON rr.review_no = r.review_no
+		JOIN `account` a
+		ON a.account_no = rr.account_no
+
+		<where>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("1")'>
+				AND r.review_name LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("2")'>
+				AND a.account_nickname LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("3")'>
+				AND r.review_txt LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+		</where>
+
+	</select>
+
+</mapper>

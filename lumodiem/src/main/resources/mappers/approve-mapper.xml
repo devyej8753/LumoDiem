@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="approveMapper">
+
+	<resultMap type="klassVo" id="approveKlassMap">
+		<result property="klassNo" column="klass_no" />
+		<result property="accountNo" column="account_no" />
+		<result property="klassName" column="klass_name" />
+		<result property="klassAddress" column="klass_address" />
+		<result property="klassPrice" column="klass_price" />
+		<result property="klassMax" column="klass_max" />
+		<result property="klassStatus" column="klass_status" />
+		<result property="klassTxt" column="klass_txt" />
+		<result property="accountNickname" column="account_nickname" />
+		<result property="klassRegDate" column="klass_reg_date" />
+		<result property="klassModDate" column="klass_mod_date" />
+	</resultMap>
+
+
+	<resultMap type="klassDateVo" id="klassDateMap">
+		<result property="klassDateNo" column="klass_date_no" />
+		<result property="klassNo" column="klass_no" />
+		<result property="klassStart" column="klass_start" />
+		<result property="klassEnd" column="klass_end" />
+		<result property="klassCount" column="klass_count" />
+	</resultMap>
+
+	<resultMap type="approveVo" id="approveMap">
+
+		<result property="approveNo" column="approve_no" />
+		<result property="klassNo" column="klass_no" />
+		<result property="approveCode" column="approve_code" />
+		<result property="approveFb" column="approve_fb" />
+
+	</resultMap>
+	<update id="updateApprove" parameterType="approveVo"
+		useGeneratedKeys="true" keyProperty="approveNo">
+		UPDATE `approve`
+
+		<if test="approveFb != null">
+			SET `approve_code` = #{approveCode}
+			,`approve_fb` = #{approveFb}
+		</if>
+		<if test="approveFb == null">
+			SET `approve_code` = #{approveCode}
+		</if>
+
+		<where>
+			klass_no = #{klassNo}
+		</where>
+	</update>
+
+	<select id="approveList" resultMap="approveKlassMap"
+		parameterType="klassVo">
+		SELECT k.* ,a.account_nickname
+		FROM `klass` k
+		JOIN `account` a
+		ON
+		k.account_no = a.account_no
+		JOIN approve ap
+		ON ap.klass_no = k.klass_no
+		<where>
+			AND ap.approve_code = 'S'
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("1")'>
+				AND k.klass_name LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("2")'>
+				AND a.account_nickname LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("3")'>
+				AND k.klass_txt LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+		</where>
+		<if test='orderType != null and orderType.equals("x") == false'>
+			<choose>
+				<when test='orderType.equals("a") == true'>
+					ORDER BY k.klass_reg_date DESC
+				</when>
+				<otherwise>
+					ORDER BY k.klass_reg_date ASC
+				</otherwise>
+			</choose>
+		</if>
+		LIMIT #{limitPageNo} ,#{numPerPage}
+	</select>
+	<!-- 페이징을 위한 카운트 -->
+	<select id="approveListCount" resultType="_int"
+		parameterType="klassVo">
+		SELECT count(*)
+		FROM `klass` k
+		JOIN `account` a
+		ON k.account_no =
+		a.account_no
+		JOIN approve ap
+		ON ap.klass_no = k.klass_no
+		<where>
+			AND ap.approve_code = 'S'
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("1")'>
+				AND k.klass_name LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("2")'>
+				AND a.account_nickname LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("3")'>
+				AND k.klass_txt LIKE CONCAT('%' ,#{searchTxt} ,'%')
+			</if>
+		</where>
+		<if test='orderType != null and orderType.equals("x") == false'>
+			<choose>
+				<when test='orderType.equals("a") == true'>
+					ORDER BY k.klass_reg_date DESC
+				</when>
+				<otherwise>
+					ORDER BY k.klass_reg_date ASC
+				</otherwise>
+			</choose>
+		</if>
+	</select>
+
+
+
+
+
+
+</mapper>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="accountMapper">
+	<resultMap type="accountVo" id="accountMap">
+		<result property="accountNo" column="account_no" />
+		<result property="accountName" column="account_name" />
+		<result property="accountId" column="account_id" />
+		<result property="accountPw" column="account_pw" />
+		<result property="accountNickname" column="account_nickname" />
+		<result property="accountSsn" column="account_ssn" />
+		<result property="accountAddress" column="account_address" />
+		<result property="accountPhone" column="account_phone" />
+		<result property="accountEmail" column="account_email" />
+		<result property="accountGrade" column="account_grade" />
+		<result property="accountRegDate" column="account_reg_date" />
+	</resultMap>
+	<!-- 회원가입 -->
+	<insert id="accountInsert" parameterType="accountVo"
+		useGeneratedKeys="true" keyProperty="accountNo">
+		INSERT INTO `account`(account_name
+		,account_id ,account_pw ,account_nickname ,account_ssn
+		,account_address ,account_phone ,account_email ,account_grade
+		,account_reg_date)
+		VALUES(#{accountName} ,#{accountId} ,#{accountPw}
+		,#{accountNickname} ,#{accountSsn} ,#{accountAddress} ,#{accountPhone}
+		,#{accountEmail} ,#{accountGrade} ,#{accountRegDate})
+	</insert>
+	<!-- 로그인 -->
+	<select id="loginSelect" parameterType="accountVo"
+		resultMap="accountMap">
+		SELECT * FROM `account` WHERE account_id=#{accountId} and
+		account_pw=#{accountPw}
+	</select>
+	<!-- 회원가입 중복확인 -->
+	<select id="accountDuplicateCheck" parameterType="accountVo"
+		resultMap="accountMap">
+		SELECT * FROM `account`
+		<where>
+			<if test="accountId != null and accountId.equals('') == false">
+				AND account_id=#{accountId}
+			</if>
+			<if
+				test="accountNickname != null and accountNickname.equals('') == false">
+				AND account_nickname=#{accountNickname}
+			</if>
+			<if test="accountSsn != null and accountSsn.equals('') == false">
+				AND account_ssn=#{accountSsn}
+			</if>
+			<if
+				test="accountPhone != null and accountPhone.equals('') == false">
+				AND account_phone=#{accountPhone}
+			</if>
+		</where>
+	</select>
+	<!-- id 조회 -->
+	<select id="searchIdNameByTwoInfo" parameterType="accountVo"
+		resultMap="accountMap">
+		SELECT account_no, account_id, account_ssn, account_name FROM
+		`account`
+		<where>
+			<if test="accountName != null and accountSsn != null">
+				AND account_name=#{accountName}
+				AND
+				account_ssn=#{accountSsn}
+			</if>
+			<if test="accountId != null and accountSsn != null">
+				AND account_id=#{accountId}
+				AND account_ssn=#{accountSsn}
+			</if>
+		</where>
+	</select>
+	<!-- pw 재설정 -->
+	<update id="resetPw" parameterType="accountVo">
+		UPDATE `account`
+		SET account_pw = #{accountPw}
+		<where>
+			AND account_id = #{accountId}
+			AND account_ssn = #{accountSsn}
+		</where>
+	</update>
+	<!-- 개인정보수정 중복확인 -->
+	<select id="mypageUpdateDuplicateCheck"
+		parameterType="accountVo" resultMap="accountMap">
+		SELECT * FROM `account`
+		<where>
+			<if
+				test="accountNickname != null and accountNickname.equals('') == false">
+				AND account_nickname=#{accountNickname}
+			</if>
+			<if
+				test="accountPhone != null and accountPhone.equals('') == false">
+				AND account_phone=#{accountPhone}
+			</if>
+			AND account_no != #{accountNo}
+		</where>
+	</select>
+	<!-- 회원가입 -->
+	<insert id="mypageUpdateEndFin" parameterType="accountVo"
+		useGeneratedKeys="true" keyProperty="accountNo">
+		UPDATE `account`
+		SET account_pw = #{accountPw}
+		,account_nickname =
+		#{accountNickname}
+		,account_phone = #{accountPhone}
+		,account_address =
+		#{accountAddress}
+		,account_email = #{accountEmail}
+		<where>
+			AND account_no = #{accountNo}
+		</where>
+	</insert>
+
+
+</mapper>

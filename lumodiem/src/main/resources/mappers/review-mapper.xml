@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="reviewMapper">
+
+	<resultMap type="reviewVo" id="reviewMap">
+		<result property="reviewNo" column="review_no" />
+		<result property="accountNo" column="account_no" />
+		<result property="resNo" column="res_no" />
+		<result property="klassDateNo" column="klass_date_no" />
+		<result property="reviewTxt" column="review_txt" />
+		<result property="reviewName" column="review_name" />
+		<result property="accountNickname" column="account_nickname" />
+		<result property="reviewRegDate" column="review_reg_date" />
+		<result property="reviewModDate" column="review_mod_date" />
+		<result property="orderType" column="order_type" />
+		<result property="attachNo" column="attach_no" />
+		<result property="attachPath" column="attach_path" />
+		<result property="reviewLikeCount" column="review_like_count" />
+		<result property="searchTxt" column="search_txt" />
+		<result property="searchType" column="search_type" />
+		<result property="klassName" column="klass_name" />
+	</resultMap>
+	<resultMap type="reviewAttachVo" id="reviewAttachMap">
+		<result property="attachNo" column="attach_no" />
+		<result property="attachOri" column="attach_ori" />
+		<result property="attachNew" column="attach_new" />
+		<result property="attachPath" column="attach_path" />
+	</resultMap>
+	<resultMap type="reservationVo" id="reservationMap">
+		<result property="resNo" column="res_no" />
+		<result property="accountNo" column="account_no" />
+		<result property="klassDataNo" column="klass_data_no" />
+		<result property="resPpl" column="res_ppl" />
+		<result property="payTime" column="pay_time" />
+		<result property="payStatus" column="pay_status" />
+		<result property="payPrice" column="pay_price" />
+	</resultMap>
+	<resultMap type="reviewMappingVo" id="reviewMappinMap">
+		<result property="mappingNo" column="mapping_no" />
+		<result property="attachNo" column="attach_no" />
+		<result property="reviewNo" column="review_no" />
+	</resultMap>
+	<resultMap type="klassVo" id="klassMap">
+		<result property="klassNo" column="klass_no" />
+		<result property="accountNo" column="account_no" />
+		<result property="klassName" column="klass_name" />
+		<result property="klassAddress" column="klass_address" />
+		<result property="klassPrice" column="klass_price" />
+		<result property="klassMax" column="klass_max" />
+		<result property="klassStatus" column="klass_status" />
+		<result property="klassTxt" column="klass_txt" />
+		<result property="accountNickname" column="account_nickname" />
+		<result property="klassRegDate" column="klass_reg_date" />
+		<result property="klassModDate" column="klass_mod_date" />
+		<result property="resNo" column="res_no" />
+		<result property="klassDateNo" column="klass_date_no" />
+	</resultMap>
+	<resultMap type="reviewLikeVo" id="reviewLikeMap">
+		<result property="reviewLikeNo" column="review_like_no" />
+		<result property="accountNo" column="account_no" />
+		<result property="reviewNo" column="review_no" />
+		<result property="reviewName" column="review_name" />
+	</resultMap>
+	<resultMap type="reportReviewVo" id="reportReviewMap">
+		<result property="reportReviewNo" column="report_review_no" />
+		<result property="accountNo" column="account_no" />
+		<result property="reviewNo" column="review_no" />
+		<result property="reviewName" column="review_name" />
+		<result property="reviewTxt" column="review_txt" />
+		<result property="accountNickname" column="account_nickname" />
+		<result property="reviewRegDate" column="review_reg_date" />
+		<result property="reviewModDate" column="review_mod_date" />
+		<result property="orderType" column="order_type" />
+		<result property="attachNo" column="attach_no" />
+		<result property="attachPath" column="attach_path" />
+		<result property="reportReviewTxt" column="report_review_txt" />
+	</resultMap>
+	<insert id="reviewInsert" parameterType="reviewVo"
+		useGeneratedKeys="true" keyProperty="reviewNo">
+		INSERT INTO `review`(account_no,
+		res_no, review_name ,review_txt ,review_reg_date ,review_mod_date)
+		VALUES (#{accountNo} ,#{resNo}, #{reviewName} ,#{reviewTxt}
+		,#{reviewRegDate} ,#{reviewModDate})
+	</insert>
+	<insert id="reviewAttachInsert" parameterType="reviewAttachVo"
+		useGeneratedKeys="true" keyProperty="attachNo">
+		INSERT INTO
+		`review_attach`(attach_ori, attach_new ,attach_path)
+		VALUES
+		(#{attachOri} ,#{attachNew}, #{attachPath})
+	</insert>
+	<insert id="reviewMappingInsert" parameterType="reviewMappingVo"
+		useGeneratedKeys="true" keyProperty="mappingNo">
+		INSERT INTO
+		`review_mapping`(review_no ,attach_no)
+		VALUES (#{reviewNo}
+		,#{attachNo})
+	</insert>
+
+
+	<select id="reviewList" resultMap="reviewMap"
+		parameterType="reviewVo">
+		SELECT r.* , a.account_nickname ,t.attach_no ,k.klass_name
+		FROM `review` r
+		JOIN `account` a ON r.account_no = a.account_no
+		LEFT JOIN `review_mapping` m ON r.review_no = m.review_no
+		LEFT JOIN `review_attach` t ON t.attach_no = m.attach_no
+		LEFT JOIN `reservation` s ON r.res_no = s.res_no
+		LEFT JOIN `klass_date` d ON s.klass_date_no = d.klass_date_no
+		LEFT JOIN `klass` k ON d.klass_no = k.klass_no
+		<where>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("1")'>
+				AND r.review_name LIKE CONCAT('%',#{searchTxt},'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("2")'>
+				AND a.account_nickname LIKE CONCAT('%',#{searchTxt},'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("3")'>
+				AND r.review_txt LIKE CONCAT('%',#{searchTxt},'%')
+			</if>
+		</where>
+
+		<if test='orderType != null and orderType.equals("x") == false'>
+			<choose>
+				<when test='orderType.equals("b") == true'>
+					ORDER BY r.review_reg_date ASC
+				</when>
+				<when test='orderType.equals("c") == true'>
+					ORDER BY r.review_like_count DESC
+				</when>
+				<otherwise>
+					ORDER BY r.review_reg_date DESC
+				</otherwise>
+			</choose>
+		</if>
+		<if test="orderType == null or orderType.equals('x') == true">
+			ORDER BY r.review_reg_date DESC
+		</if>
+		LIMIT #{limitPageNo}, #{numPerPage}
+	</select>
+
+	<select id="reviewOne" resultMap="reviewMap"
+		parameterType="_int">
+		SELECT r.*, a.account_nickname, ra.attach_no
+		,ra.attach_path ,k.klass_name
+		FROM `review` r
+		JOIN `account` a ON
+		r.account_no = a.account_no
+		JOIN `review_mapping` m ON r.review_no =
+		m.review_no
+		JOIN `review_attach` ra ON ra.attach_no = m.attach_no
+		JOIN
+		`reservation` s ON r.res_no = s.res_no
+		JOIN `klass_date` d ON
+		s.klass_date_no = d.klass_date_no
+		JOIN `klass` k ON d.klass_no =
+		k.klass_no
+		WHERE r.review_no = #{reviewNo}
+	</select>
+	<select id="reviewNoimg" resultMap="reviewMap"
+		parameterType="_int">
+		SELECT r.*, a.account_nickname, k.klass_name
+		FROM
+		`review` r
+		JOIN `account` a ON r.account_no = a.account_no
+		JOIN
+		`reservation` s ON r.res_no = s.res_no
+		JOIN `klass_date` d ON
+		s.klass_date_no = d.klass_date_no
+		JOIN `klass` k ON d.klass_no =
+		k.klass_no
+		WHERE r.review_no = #{reviewNo}
+	</select>
+	<select id="attachOne" resultMap="reviewAttachMap"
+		parameterType="_int">
+		SELECT *
+		FROM `review_attach`
+		WHERE attach_no =
+		#{attachNo}
+	</select>
+	<select id="attendedKlass" resultMap="klassMap"
+		parameterType="_int">
+		SELECT k.*, r.res_no, d.klass_date_no
+		FROM `klass` k
+		JOIN
+		`account` a ON k.account_no = a.account_no
+		JOIN `klass_date` d ON
+		k.klass_no = d.klass_no
+		JOIN `reservation` r ON d.klass_date_no =
+		r.klass_date_no
+		WHERE r.account_no = #{accountNo}
+	</select>
+	<select id="noImgReview" resultMap="reviewAttachMap"
+		parameterType="_int">
+		SELECT a.*
+		FROM `review_attach` a
+		JOIN `review_mapping` m
+		ON a.attach_no = m.attach_no
+		JOIN `review` r ON r.review_no =
+		m.review_no
+		WHERE r.review_no = #{reviewNo}
+	</select>
+	<delete id="deleteReview" parameterType="reviewVo">
+		DELETE r FROM `review` r
+		JOIN `review_mapping` rm ON r.review_no = rm.review_no
+		JOIN
+		`review_attach` a ON a.attach_no = rm.attach_no
+		WHERE r.review_no =
+		#{reviewNo};
+	</delete>
+	<delete id="deleteAttach" parameterType="reviewAttachVo">
+		DELETE FROM
+		`review_attach`
+		WHERE attach_no = #{accountNo}
+	</delete>
+	<delete id="deleteReviewOne" parameterType="reviewVo">
+		DELETE FROM `review`
+		WHERE review_no = #{reviewNo}
+	</delete>
+	<!-- 해당 리뷰의 좋아요 갯수 -->
+	<select id="countLikeByReviewNo" parameterType="_int"
+		resultType="int">
+		SELECT count(*)
+		FROM `review_like`
+		<where>
+			review_no = #{reviewNo}
+		</where>
+	</select>
+	<!-- 해당 리뷰의 좋아요 갯수 -->
+	<select id="countLikeByAccountNoReviewNo"
+		parameterType="reviewLikeVo" resultType="int">
+		SELECT count(*)
+		FROM `review_like`
+		<where>
+			review_no = #{reviewNo}
+			AND account_no = #{accountNo}
+		</where>
+	</select>
+	<!-- 좋아요 추가 -->
+	<insert id="reviewUnlikeToLike" parameterType="reviewLikeVo"
+		useGeneratedKeys="true" keyProperty="reviewNo">
+		INSERT INTO
+		`review_like`(account_no ,review_no)
+		VALUES (#{accountNo} ,#{reviewNo})
+	</insert>
+	<!-- 좋아요 제거 -->
+	<delete id="reviewLikeToUnlike" parameterType="reviewLikeVo">
+		DELETE FROM `review_like`
+		<where>
+			review_no = #{reviewNo}
+			AND account_no = #{accountNo}
+		</where>
+	</delete>
+	<!-- 리뷰 게시글 수정 페이지 -->
+	<update id="reviewUpdate" parameterType="reviewVo">
+		UPDATE `review`
+		SET
+		review_name = #{reviewName}
+		,review_txt = #{reviewTxt}
+		,review_mod_date = #{reviewModDate}
+		WHERE review_no = #{reviewNo}
+	</update>
+	<delete id="deletebeforeImg" parameterType="reviewAttachVo">
+		DELETE FROM
+		`review_attach`
+		WHERE attach_no = #{attachNo}
+	</delete>
+	<insert id="insertReportReview" parameterType="reportReviewVo"
+		useGeneratedKeys="true">
+		INSERT INTO `report_review`(account_no ,review_no
+		,report_review_txt)
+		VALUES (#{accountNo} ,#{reviewNo}
+		,#{reportReviewTxt})
+	</insert>
+	<!-- 페이징을 위한 카운트 -->
+	<select id="selectReviewCount" resultType="_int"
+		parameterType="reviewVo">
+		SELECT count(*)
+		FROM `review` r
+		JOIN `account` a ON r.account_no = a.account_no
+		LEFT JOIN `review_mapping` m ON r.review_no = m.review_no
+		LEFT JOIN `review_attach` t ON t.attach_no = m.attach_no
+		LEFT JOIN `reservation` s ON r.res_no = s.res_no
+		LEFT JOIN `klass_date` d ON s.klass_date_no = d.klass_date_no
+		LEFT JOIN `klass` k ON d.klass_no = k.klass_no
+		<where>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("1")'>
+				AND r.review_name LIKE CONCAT('%',#{searchTxt},'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("2")'>
+				AND a.account_nickname LIKE CONCAT('%',#{searchTxt},'%')
+			</if>
+			<if
+				test='searchType != null and searchType.equals("0") == false and searchType.equals("3")'>
+				AND r.review_txt LIKE CONCAT('%',#{searchTxt},'%')
+			</if>
+		</where>
+
+		<if test='orderType != null and orderType.equals("x") == false'>
+			<choose>
+				<when test='orderType.equals("b") == true'>
+					ORDER BY r.review_reg_date ASC
+				</when>
+				<when test='orderType.equals("c") == true'>
+					ORDER BY r.review_like_count DESC
+				</when>
+				<otherwise>
+					ORDER BY r.review_reg_date DESC
+				</otherwise>
+			</choose>
+		</if>
+		<if test="orderType == null or orderType.equals('x') == true">
+			ORDER BY r.review_reg_date DESC
+		</if>
+	</select>
+
+
+</mapper>
